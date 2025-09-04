@@ -24,24 +24,63 @@ Improves availability and reliability.
 
 Examples: NGINX, HAProxy, AWS ELB.
 
-3. Caching
+3. Caching:
+Caching stores frequently accessed data in memory for faster retrieval.
 
-Storing frequently accessed data for faster access.
+Reduces database load.
 
-Databases
+Improves performance.
 
-SQL vs NoSQL
+Types:
 
-Database sharding, replication, partitioning
+Client-side (browser cache)
 
-Message Queues
+Server-side (Redis, Memcached)
 
-Decoupling services (e.g., Kafka, RabbitMQ).
+CDN caching
 
-CDN (Content Delivery Network)
+
+4. Databases:
+SQL (Relational): Structured, strict schema, ACID compliance. (e.g., MySQL, PostgreSQL)
+
+NoSQL (Non-relational): Flexible, handles unstructured data, scales horizontally. (e.g., MongoDB, Cassandra)
+That is SQL vs NoSQL
+
+Techniques:
+
+Replication: Copying data across multiple servers for fault tolerance.
+
+Sharding: Splitting large databases into smaller chunks.
+
+Partitioning: Breaking a table into pieces for performance.
+
+5. Message Queues
+Used to decouple services and allow asynchronous communication.
+
+Improves scalability and reliability.
+
+Examples: Kafka, RabbitMQ, Amazon SQS.
+
+
+6. CDN (Content Delivery Network):
+A network of servers worldwide that deliver static content (images, videos, CSS, JS) quickly.
 
 Speeds up content delivery worldwide.
 
-Consistency, Availability, Partition Tolerance (CAP Theorem)
+Reduces latency by serving content from the nearest location.
+
+Examples: Cloudflare, Akamai, AWS CloudFront.
+
+7. Consistency, Availability, Partition Tolerance (CAP Theorem):
+
+A distributed system can only guarantee two out of three:
+
+Consistency (C): Every user sees the same data at the same time.
+
+Availability (A): System responds even if some nodes fail.
+
+Partition Tolerance (P): System works even if communication between nodes fails.
 
 You can’t have all three at once → trade-offs are required.
+
+➡️ Trade-offs depend on the system’s needs.
