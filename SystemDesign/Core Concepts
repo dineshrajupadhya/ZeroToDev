@@ -1,0 +1,47 @@
+Core Concepts:
+
+1.Scalability:
+
+Scalability is the ability of a system to handle increasing load without performance issues.
+
+Vertical Scaling (increase resources in one server):Adding more power (CPU, RAM, Storage) to a single machine.
+✅ Easy to implement
+
+❌ Limited by hardware capacity
+
+
+Horizontal Scaling (add more servers): Adding more machines/servers to distribute the load.
+✅ Can scale almost infinitely
+
+❌ Requires load balancing and distributed architecture
+
+2.Load Balancing:
+Load balancers distribute incoming traffic across multiple servers so that:
+
+No single server is overwhelmed.
+
+Improves availability and reliability.
+
+Examples: NGINX, HAProxy, AWS ELB.
+
+3. Caching
+
+Storing frequently accessed data for faster access.
+
+Databases
+
+SQL vs NoSQL
+
+Database sharding, replication, partitioning
+
+Message Queues
+
+Decoupling services (e.g., Kafka, RabbitMQ).
+
+CDN (Content Delivery Network)
+
+Speeds up content delivery worldwide.
+
+Consistency, Availability, Partition Tolerance (CAP Theorem)
+
+You can’t have all three at once → trade-offs are required.
