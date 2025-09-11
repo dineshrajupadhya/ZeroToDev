@@ -1,16 +1,14 @@
-# Heading 1
-## Heading 2
-### Heading 3
+
 
   
-*Italic text*  
+
 
 
 #Number that is similar to the numbers given in the set(439,725,912)
-**Bold text** (a)815    (b)717    (c)327    (d)219
+**Bold (a)815    (b)717    (c)327    (d)219 text**
 
 solution:
-439,725,912
+**Bold 439,725,912text**
 |_|
 (4+9)-10=13-10=3(which is the middle term)
 (7+5)-10=12-10=2(which is the middle term)
