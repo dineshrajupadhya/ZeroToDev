@@ -1,21 +1,30 @@
+# Number that is similar to the numbers given in the set (439, 725, 912)
 
+**Options:**  
+(a) 815  (b) 717  (c) 327  (d) 219  
 
-  
+---
 
+### ✅ Solution:
 
+Given numbers: **439, 725, 912**
 
-#Number that is similar to the numbers given in the set(439,725,912)
-**Bold (a)815    (b)717    (c)327    (d)219 text**
+1. For **439** → (4+9) - 10 = **13 - 10 = 3** → middle term ✔️  
+2. For **725** → (7+5) - 10 = **12 - 10 = 2** → middle term ✔️  
+3. For **912** → (9+2) - 10 = **11 - 10 = 1** → middle term ✔️  
 
-solution:
-**Bold 439,725,912 text**
-|_|
-(4+9)-10=13-10=3(which is the middle term)**Break**
-(7+5)-10=12-10=2(which is the middle term)
-so following the same pattern, check it for all the provided options
-for(c) (3+7)-10=10-10=0, which is not the middle term
-for(b)  (7+7)-10=14-10=4,which is not the middle term
-***Bold & for(d) (2+9)-10=11-10=1, which is the middle term, and therefore it is the correct answer Italic text**
+---
+
+Now check the options:
+
+- **(c) 327** → (3+7) - 10 = **10 - 10 = 0** → ❌ not the middle term  
+- **(b) 717** → (7+7) - 10 = **14 - 10 = 4** → ❌ not the middle term  
+- **(a) 815** → (8+1) - 10 = **9 - 10 = -1** → ❌ not the middle term  
+- **(d) 219** → (2+9) - 10 = **11 - 10 = 1** → ✔️ matches the middle term  
+
+---
+
+👉 **Correct Answer: (d) 219 🎉**
 
 
 
