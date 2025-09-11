@@ -10,7 +10,7 @@
 solution:
 **Bold 439,725,912 text**
 |_|
-(4+9)-10=13-10=3(which is the middle term)
+(4+9)-10=13-10=3(which is the middle term)**Break**
 (7+5)-10=12-10=2(which is the middle term)
 so following the same pattern, check it for all the provided options
 for(c) (3+7)-10=10-10=0, which is not the middle term
