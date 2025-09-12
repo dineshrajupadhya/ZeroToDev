@@ -1,0 +1,22 @@
+**Check if the Number is a Palindrome or not **
+#include <stdio.h>
+
+int main() {
+    // Write C code here
+    int number,i,rem,sum=0,temp;
+    printf("Enter the Number:");
+    scanf("%d",&number);
+    temp=number;
+    while(number>0)
+    {
+        rem=number%10;
+        sum=sum*10+rem;
+        number=number/10;
+    }
+    number=temp;
+    if(number==sum)
+    printf("Palindrome");
+    else
+    printf("Not a Palindrome");
+    return 0;
+}
