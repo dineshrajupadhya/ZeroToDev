@@ -1,22 +1,47 @@
-**Check if the Number is a Palindrome or not **
+# ✅ Check if the Number is a Palindrome or Not
+
+A **palindrome number** is a number that remains the same when its digits are reversed.  
+Example: 121, 1331, 454, etc.
+
+---
+
+### 📌 C Program:
+
+```c
 #include <stdio.h>
 
 int main() {
-    // Write C code here
-    int number,i,rem,sum=0,temp;
-    printf("Enter the Number:");
-    scanf("%d",&number);
-    temp=number;
-    while(number>0)
-    {
-        rem=number%10;
-        sum=sum*10+rem;
-        number=number/10;
+    int number, i, rem, sum = 0, temp;
+    
+    printf("Enter the Number: ");
+    scanf("%d", &number);
+    
+    temp = number;  // Store the original number
+    
+    while (number > 0) {
+        rem = number % 10;          // Get last digit
+        sum = sum * 10 + rem;       // Build the reversed number
+        number = number / 10;       // Remove last digit
     }
-    number=temp;
-    if(number==sum)
-    printf("Palindrome");
+    
+    // Restore number for comparison
+    number = temp;
+    
+    if (number == sum)
+        printf("Palindrome");
     else
-    printf("Not a Palindrome");
+        printf("Not a Palindrome");
+    
     return 0;
 }
+
+
+
+
+OUTPUT:
+Enter the Number:133
+Not a Palindrome
+
+Enter the Number:121
+Palindrome
+
