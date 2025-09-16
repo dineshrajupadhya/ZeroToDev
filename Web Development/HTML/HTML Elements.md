@@ -8,8 +8,8 @@
 
 ## The <header> HTML element represents introductory content, typically a group of introductory or navigational aids. It may contain some heading elements but also a logo, a search form, an author name, and other elements.
 
-##example:
-##<header>
+## example:
+## <header>
 ##  <h1>Main Page Title</h1>
 ##  <img src="mdn-logo-sm.png" alt="MDN logo" />
-##</header>
+## </header>
