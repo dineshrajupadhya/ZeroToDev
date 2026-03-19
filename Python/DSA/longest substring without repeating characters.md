@@ -12,3 +12,7 @@
   ##  if len(word)>len(long):
   ##      long=word
 ## print(long)
+
+## OUTPUT:
+## Enter String:AbcdefAabcdde
+## bcdefAa
