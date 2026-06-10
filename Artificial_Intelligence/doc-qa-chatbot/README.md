@@ -1,62 +1,70 @@
 # DocQA Chatbot
 
-A Document Q&A Chatbot using RAG (Retrieval-Augmented Generation). Upload documents and ask questions to get AI-powered answers with source references.
+A Document Q&A Chatbot using RAG (Retrieval-Augmented Generation). Upload documents, scrape URLs, ask questions, and get AI-powered answers with source references.
+
+## Live Demo
+
+**Hosted on HuggingFace Spaces:** https://dineshupadhya-docqa-chatbot.hf.space
 
 ## Features
 
-- Upload PDF, DOCX, or TXT files
-- Automatic text chunking and embedding
-- Vector storage with ChromaDB
-- Question answering with source citations
-- Two LLM options: OpenAI (paid) or HuggingFace (free)
-- Clean Streamlit chat interface
+- **Batch Upload** - Upload multiple PDF, DOCX, TXT, CSV, MD files at once
+- **Chat with Memory** - Follow-up questions with conversation history
+- **Auto-Summarize** - Generate summaries of uploaded documents
+- **URL Scraper** - Scrape any webpage and ask questions about its content
+- **Document Analytics** - Word count, top words, charts
+- **Chunk Viewer** - Browse and search all text chunks
+- **Delete Documents** - Remove individual documents from the vector store
+- **Export Chat** - Download conversation as text file
+- **Source Citations** - Answers linked back to original document sections
 
 ## Tech Stack
 
-- **Backend:** FastAPI, LangChain, ChromaDB
+- **Backend:** FastAPI, LangChain, ChromaDB, BeautifulSoup
 - **Frontend:** Streamlit
-- **Embeddings:** HuggingFace (free) or OpenAI
-- **LLM:** OpenAI GPT-3.5-turbo or HuggingFace Flan-T5
+- **Embeddings:** HuggingFace all-MiniLM-L6-v2 (free)
+- **LLM:** HuggingFace Flan-T5-small (free) or OpenAI GPT-3.5-turbo
+- **Deployment:** HuggingFace Spaces (Docker)
 
 ## Quick Start
 
-### 1. Setup Backend
+### Local Setup
 
 ```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Start backend (Terminal 1)
 cd backend
-pip install -r requirements.txt
-cp .env.example .env
-```
+python run.py
 
-Edit `.env` — either add your OpenAI key or leave it empty to use free HuggingFace models.
-
-Start the backend:
-```bash
-python main.py
-```
-
-### 2. Setup Frontend
-
-```bash
+# Start frontend (Terminal 2)
 cd frontend
-pip install -r requirements.txt
 streamlit run app.py
 ```
 
-### 3. Use
+Open http://localhost:8501
 
-1. Open http://localhost:8501
-2. Upload a document (PDF, DOCX, or TXT)
-3. Ask questions about the document
+### Docker Setup
+
+```bash
+docker build -t docqa-chatbot .
+docker run -p 7860:7860 docqa-chatbot
+```
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/upload` | Upload a document |
-| POST | `/ask` | Ask a question |
-| GET | `/stats/{collection}` | Get collection stats |
-| GET | `/health` | Health check |
+| POST | `/api/upload` | Upload a document |
+| POST | `/api/upload/batch` | Upload multiple documents |
+| POST | `/api/ask` | Ask a question |
+| POST | `/api/summarize` | Summarize text |
+| POST | `/api/scrape` | Scrape a URL |
+| GET | `/api/documents` | List all documents |
+| GET | `/api/chunks` | Browse text chunks |
+| GET | `/api/analytics` | Document analytics |
+| GET | `/api/health` | Health check |
 
 ## Project Structure
 
@@ -66,18 +74,11 @@ doc-qa-chatbot/
 │   ├── main.py          # FastAPI server
 │   ├── rag.py           # RAG pipeline
 │   ├── config.py        # Configuration
-│   ├── requirements.txt
-│   └── .env.example
+│   └── run.py           # Dev runner
 ├── frontend/
-│   ├── app.py           # Streamlit UI
-│   └── requirements.txt
-├── vectorstore/         # ChromaDB storage
-└── README.md
+│   └── app.py           # Streamlit UI
+├── Dockerfile           # Container build
+├── nginx.conf           # Reverse proxy
+├── supervisord.conf     # Process manager
+└── requirements.txt     # All dependencies
 ```
-
-## LLM Options
-
-| Option | Cost | Quality | Setup |
-|--------|------|---------|-------|
-| HuggingFace (free) | Free | Good | No API key needed |
-| OpenAI | ~$0.001/query | Best | Requires API key |
