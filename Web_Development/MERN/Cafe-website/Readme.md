@@ -4,12 +4,14 @@ A full-stack cafeteria management system with React, Node.js, Express, MongoDB, 
 
 ## Live Demo
 
-**Hosted on Netlify:** https://stunning-dragon-2ea029.netlify.app
+**Frontend:** https://stunning-dragon-2ea029.netlify.app
 
 **Backend API:** https://smart-cafe-order-backend.onrender.com
 
-- **Admin:** admin@smartcafe.com / admin123
-- **User:** john@example.com / user123
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@smartcafe.com | admin123 |
+| User | john@example.com | user123 |
 
 ## Features
 
@@ -63,24 +65,57 @@ npm start
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 
-### Demo Credentials
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@smartcafe.com | admin123 |
-| User | john@example.com | user123 |
-
 ## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/auth/register` | Register |
 | POST | `/api/auth/login` | Login |
-| GET | `/api/products` | Get all products |
+| GET | `/api/auth/me` | Get current user |
+| PUT | `/api/auth/profile` | Update profile |
+| PUT | `/api/auth/password` | Update password |
+| GET | `/api/products` | Get all products (with filters) |
+| GET | `/api/products/:id` | Get single product |
+| POST | `/api/products` | Create product (admin) |
+| PUT | `/api/products/:id` | Update product (admin) |
+| DELETE | `/api/products/:id` | Delete product (admin) |
+| PUT | `/api/products/:id/stock` | Update stock (admin) |
+| GET | `/api/categories` | Get all categories |
+| POST | `/api/categories` | Create category (admin) |
+| PUT | `/api/categories/:id` | Update category (admin) |
+| DELETE | `/api/categories/:id` | Delete category (admin) |
+| GET | `/api/cart` | Get cart |
 | POST | `/api/cart/add` | Add to cart |
+| PUT | `/api/cart/item/:itemId` | Update cart item |
+| DELETE | `/api/cart/item/:itemId` | Remove from cart |
+| DELETE | `/api/cart/clear` | Clear cart |
+| POST | `/api/cart/coupon` | Apply coupon |
 | POST | `/api/orders` | Create order |
+| GET | `/api/orders/my-orders` | Get my orders |
+| GET | `/api/orders/:id` | Get order |
+| PUT | `/api/orders/:id/status` | Update status (admin) |
+| PUT | `/api/orders/:id/cancel` | Cancel order |
+| PUT | `/api/orders/:id/rate` | Rate order |
+| POST | `/api/payments/process` | Process payment |
+| GET | `/api/payments` | Get all payments (admin) |
+| PUT | `/api/payments/:id/refund` | Refund (admin) |
 | GET | `/api/admin/dashboard` | Dashboard stats |
+| GET | `/api/admin/users` | Get all users |
+| PUT | `/api/admin/users/:id/role` | Update user role |
+| PUT | `/api/admin/users/:id/toggle-active` | Toggle user status |
+| GET | `/api/admin/orders` | Get all orders |
 | GET | `/api/reports/sales` | Sales report |
+| GET | `/api/reports/inventory` | Inventory report |
+| GET | `/api/reports/customers` | Customer report |
+| GET | `/api/reports/payments` | Payment report |
+| GET | `/api/recommendations` | Get recommendations |
+| POST | `/api/recommendations/track` | Track preference |
+| GET | `/api/recommendations/popular` | Popular items |
+| GET | `/api/recommendations/trending` | Trending items |
+| POST | `/api/qr/table/generate` | Generate table QR (admin) |
+| POST | `/api/qr/order/generate` | Generate order QR (admin) |
+| GET | `/api/qr/tables` | Get all tables |
+| GET | `/api/qr/tables/:tableNumber` | Get table info |
 
 ## Project Structure
 
