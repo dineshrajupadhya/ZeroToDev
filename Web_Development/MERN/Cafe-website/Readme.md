@@ -4,7 +4,9 @@ A full-stack cafeteria management system with React, Node.js, Express, MongoDB, 
 
 ## Live Demo
 
-**Hosted on Netlify:** https://264fbe1e-11b0-4c2e-b96d-59f5e4c6f29a.netlify.app
+**Hosted on Netlify:** https://stunning-dragon-2ea029.netlify.app
+
+**Backend API:** https://smart-cafe-order-backend.onrender.com
 
 - **Admin:** admin@smartcafe.com / admin123
 - **User:** john@example.com / user123
