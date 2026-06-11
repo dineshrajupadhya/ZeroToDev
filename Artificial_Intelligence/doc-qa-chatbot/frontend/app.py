@@ -87,24 +87,18 @@ with tab_chat:
         st.subheader("Voice Input")
 
         if VOICE_AVAILABLE:
-            audio_file = st.audio_input("Click to record, speak, then click stop", key="voice_recorder")
+            audio_file = st.audio_input("Record your question", key="voice_recorder")
             if audio_file:
                 with st.spinner("Transcribing..."):
                     try:
-                        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-                            tmp.write(audio_file.getvalue())
-                            tmp_path = tmp.name
-
                         recognizer = sr.Recognizer()
-                        with sr.AudioFile(tmp_path) as source:
+                        with sr.AudioFile(audio_file) as source:
                             audio_data = recognizer.record(source)
-
                         text = recognizer.recognize_google(audio_data)
-                        os.unlink(tmp_path)
 
                         if text.strip():
-                            st.session_state["voice_auto_send"] = text
-
+                            st.success(f"Transcribed: {text}")
+                            st.session_state["voice_query"] = text
                     except sr.UnknownValueError:
                         st.error("Could not understand the audio. Try speaking more clearly.")
                     except sr.RequestError as e:
@@ -112,12 +106,9 @@ with tab_chat:
                     except Exception as e:
                         st.error(f"Error: {e}")
 
-            voice_auto = st.session_state.get("voice_auto_send", "")
-            if voice_auto:
-                st.session_state["voice_auto_send"] = ""
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                st.session_state.messages.append({"role": "user", "content": voice_auto, "timestamp": timestamp})
-
+            voice_q = st.session_state.pop("voice_query", None)
+            if voice_q:
+                st.session_state.messages.append({"role": "user", "content": voice_q, "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
                 with st.chat_message("assistant"):
                     with st.spinner("Thinking..."):
                         try:
@@ -125,7 +116,7 @@ with tab_chat:
                                        for m in st.session_state.messages[:-1]
                                        if m["role"] in ("user", "assistant")]
                             res = requests.post(f"{API_URL}/ask", json={
-                                "question": voice_auto,
+                                "question": voice_q,
                                 "collection": "docs",
                                 "chat_history": history[-6:],
                             }, timeout=TIMEOUT)
