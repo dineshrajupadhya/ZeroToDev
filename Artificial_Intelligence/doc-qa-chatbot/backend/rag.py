@@ -158,18 +158,6 @@ Answer:"""
         "sources": sources,
     }
 
-    sources = []
-    for doc in result.get("source_documents", []):
-        sources.append({
-            "content": doc.page_content[:300],
-            "metadata": doc.metadata,
-        })
-
-    return {
-        "answer": result["result"],
-        "sources": sources,
-    }
-
 
 def get_collection_stats(collection_name: str = "docs") -> dict:
     vectorstore = get_vectorstore(collection_name)

@@ -27,6 +27,16 @@ st.markdown("""
 st.title("DocQA Chatbot")
 st.caption("Upload documents, scrape URLs, ask questions, get insights")
 
+try:
+    _stats = requests.get(f"{API_URL}/stats/docs", timeout=5).json()
+    _chunk_count = _stats.get("total_chunks", 0)
+    if _chunk_count == 0:
+        st.warning("No documents uploaded yet. Upload a file in the Chat or Documents tab to get started.")
+    else:
+        st.success(f"Ready — {_chunk_count} chunks indexed")
+except Exception:
+    pass
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "uploaded_files_list" not in st.session_state:

@@ -170,7 +170,10 @@ def ask(req: AskRequest):
 
     stats = get_collection_stats(req.collection)
     if stats["total_chunks"] == 0:
-        raise HTTPException(status_code=400, detail="No documents uploaded yet.")
+        return AskResponse(
+            answer="No documents uploaded yet. Please upload a document first (PDF, TXT, DOCX, CSV, or MD) in the Documents tab, then ask your question.",
+            sources=[],
+        )
 
     history_text = ""
     if req.chat_history:
