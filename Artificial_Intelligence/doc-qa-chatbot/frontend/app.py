@@ -13,7 +13,7 @@ except ImportError:
     VOICE_AVAILABLE = False
 
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
-TIMEOUT = 120
+TIMEOUT = 300
 
 st.set_page_config(page_title="DocQA Chatbot", page_icon=":books:", layout="wide")
 
@@ -120,7 +120,7 @@ with tab_chat:
             if voice_q:
                 st.session_state.messages.append({"role": "user", "content": voice_q, "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
                 with st.chat_message("assistant"):
-                    with st.spinner("Thinking..."):
+                    with st.spinner("Thinking... (first query may take 1-2 min while model loads)"):
                         try:
                             history = [{"role": m["role"], "content": m["content"]}
                                        for m in st.session_state.messages[:-1]
@@ -131,22 +131,31 @@ with tab_chat:
                                 "chat_history": history[-6:],
                             }, timeout=TIMEOUT)
                             if res.status_code == 200:
-                                data = res.json()
+                                try:
+                                    data = res.json()
+                                except Exception:
+                                    st.error("Server returned invalid response. Try again.")
+                                    st.stop()
                                 answer = data["answer"]
                                 st.write(answer)
-                                if data["sources"]:
+                                if data.get("sources"):
                                     with st.expander("Sources"):
                                         for src in data["sources"]:
                                             st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
                                             st.text(src["content"])
                                 st.session_state.messages.append({
                                     "role": "assistant", "content": answer,
-                                    "sources": data["sources"],
+                                    "sources": data.get("sources", []),
                                     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                 })
                             else:
-                                error = res.json().get("detail", "Error") if res.text else f"Error {res.status_code}"
+                                try:
+                                    error = res.json().get("detail", f"Error {res.status_code}")
+                                except Exception:
+                                    error = f"Server error ({res.status_code}). Try again."
                                 st.error(error)
+                        except requests.exceptions.Timeout:
+                            st.error("Request timed out. The server may be warming up — try again in a moment.")
                         except Exception as e:
                             st.error(f"Error: {e}")
         else:
@@ -176,7 +185,7 @@ with tab_chat:
                 st.caption(timestamp)
 
             with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
+                with st.spinner("Thinking... (first query may take 1-2 min while model loads)"):
                     try:
                         history = [{"role": m["role"], "content": m["content"]}
                                    for m in st.session_state.messages[:-1]
@@ -187,22 +196,31 @@ with tab_chat:
                             "chat_history": history[-6:],
                         }, timeout=TIMEOUT)
                         if res.status_code == 200:
-                            data = res.json()
+                            try:
+                                data = res.json()
+                            except Exception:
+                                st.error("Server returned invalid response. Try again.")
+                                st.stop()
                             answer = data["answer"]
                             st.write(answer)
-                            if data["sources"]:
+                            if data.get("sources"):
                                 with st.expander("Sources"):
                                     for src in data["sources"]:
                                         st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
                                         st.text(src["content"])
                             st.session_state.messages.append({
                                 "role": "assistant", "content": answer,
-                                "sources": data["sources"],
+                                "sources": data.get("sources", []),
                                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                             })
                         else:
-                            error = res.json().get("detail", "Error") if res.text else f"Error {res.status_code}"
+                            try:
+                                error = res.json().get("detail", f"Error {res.status_code}")
+                            except Exception:
+                                error = f"Server error ({res.status_code}). Try again."
                             st.error(error)
+                    except requests.exceptions.Timeout:
+                        st.error("Request timed out. The server may be warming up — try again in a moment.")
                     except Exception as e:
                         st.error(f"Error: {e}")
 
