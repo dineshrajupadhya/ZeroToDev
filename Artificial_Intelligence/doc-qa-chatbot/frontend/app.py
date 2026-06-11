@@ -3,7 +3,14 @@ import requests
 import json
 import re
 import os
+import tempfile
 from datetime import datetime
+
+try:
+    import speech_recognition as sr
+    VOICE_AVAILABLE = True
+except ImportError:
+    VOICE_AVAILABLE = False
 
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
 TIMEOUT = 120
@@ -78,8 +85,71 @@ with tab_chat:
 
         st.divider()
         st.subheader("Voice Input")
-        if st.button("Start Voice Input", use_container_width=True):
-            st.info("Click the microphone icon in the chat input box below (browser only)")
+
+        if VOICE_AVAILABLE:
+            audio_file = st.audio_input("Click to record, speak, then click stop", key="voice_recorder")
+            if audio_file:
+                with st.spinner("Transcribing..."):
+                    try:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+                            tmp.write(audio_file.getvalue())
+                            tmp_path = tmp.name
+
+                        recognizer = sr.Recognizer()
+                        with sr.AudioFile(tmp_path) as source:
+                            audio_data = recognizer.record(source)
+
+                        text = recognizer.recognize_google(audio_data)
+                        os.unlink(tmp_path)
+
+                        if text.strip():
+                            st.session_state["voice_auto_send"] = text
+
+                    except sr.UnknownValueError:
+                        st.error("Could not understand the audio. Try speaking more clearly.")
+                    except sr.RequestError as e:
+                        st.error(f"Speech service error: {e}")
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+
+            voice_auto = st.session_state.get("voice_auto_send", "")
+            if voice_auto:
+                st.session_state["voice_auto_send"] = ""
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                st.session_state.messages.append({"role": "user", "content": voice_auto, "timestamp": timestamp})
+
+                with st.chat_message("assistant"):
+                    with st.spinner("Thinking..."):
+                        try:
+                            history = [{"role": m["role"], "content": m["content"]}
+                                       for m in st.session_state.messages[:-1]
+                                       if m["role"] in ("user", "assistant")]
+                            res = requests.post(f"{API_URL}/ask", json={
+                                "question": voice_auto,
+                                "collection": "docs",
+                                "chat_history": history[-6:],
+                            }, timeout=TIMEOUT)
+                            if res.status_code == 200:
+                                data = res.json()
+                                answer = data["answer"]
+                                st.write(answer)
+                                if data["sources"]:
+                                    with st.expander("Sources"):
+                                        for src in data["sources"]:
+                                            st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
+                                            st.text(src["content"])
+                                st.session_state.messages.append({
+                                    "role": "assistant", "content": answer,
+                                    "sources": data["sources"],
+                                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                })
+                            else:
+                                error = res.json().get("detail", "Error") if res.text else f"Error {res.status_code}"
+                                st.error(error)
+                        except Exception as e:
+                            st.error(f"Error: {e}")
+        else:
+            st.info("Voice input requires the `SpeechRecognition` package.")
 
     with c2:
         st.subheader("Chat")
@@ -95,16 +165,7 @@ with tab_chat:
                             st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
                             st.text(src["content"])
 
-        question = st.chat_input("Ask something... (or click mic above for voice)")
-
-        st.markdown("""
-        <script>
-        const chatInput = window.parent.document.querySelector('[data-testid="stChatInput"] textarea');
-        if (chatInput && !window._micAdded) {
-            window._micAdded = true;
-        }
-        </script>
-        """, unsafe_allow_html=True)
+        question = st.chat_input("Ask something...")
 
         if question:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
