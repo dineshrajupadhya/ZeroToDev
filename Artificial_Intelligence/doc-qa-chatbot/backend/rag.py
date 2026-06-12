@@ -171,13 +171,7 @@ def ask_question(question: str, collection_name: str = "docs", history: str = ""
 
     history_block = f"Conversation history:\n{history}\n\n" if history else ""
 
-    prompt = f"""Answer the question based on the context below. Be helpful and detailed. If the answer is not in the context, say "I don't have enough information."
-
-{history_block}Context: {context_text}
-
-Question: {question}
-
-Answer:"""
+    prompt = f"""context: {context_text} question: {question} answer:"""
 
     llm = get_llm()
     result = llm.invoke(prompt)
