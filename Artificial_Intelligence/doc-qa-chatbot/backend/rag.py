@@ -3,9 +3,10 @@ import traceback
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, CSVLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings, HuggingFacePipeline
-from langchain_core.prompts import PromptTemplate
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_core.language_models.llms import LLM
+from langchain_core.callbacks import CallbackManagerForLLMRun
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from config import (
     OPENAI_API_KEY, EMBEDDING_MODEL, CHUNK_SIZE,
@@ -15,6 +16,34 @@ from config import (
 _llm = None
 _embedding_model = None
 _llm_error = None
+
+
+class FlanT5LLM(LLM):
+    model_id: str = "google/flan-t5-small"
+    model: object = None
+    tokenizer: object = None
+
+    @property
+    def _llm_type(self) -> str:
+        return "flan-t5"
+
+    def _call(
+        self,
+        prompt: str,
+        stop: list[str] | None = None,
+        run_manager: CallbackManagerForLLMRun | None = None,
+        **kwargs,
+    ) -> str:
+        inputs = self.tokenizer(prompt, return_tensors="pt", max_length=512, truncation=True)
+        outputs = self.model.generate(**inputs, max_new_tokens=256)
+        return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    @classmethod
+    def from_pretrained(cls, model_id: str = "google/flan-t5-small") -> "FlanT5LLM":
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
+        instance = cls(model_id=model_id, model=model, tokenizer=tokenizer)
+        return instance
 
 
 def get_embeddings():
@@ -43,16 +72,7 @@ def get_llm():
             from langchain_openai import ChatOpenAI
             _llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0, openai_api_key=OPENAI_API_KEY)
         else:
-            model_id = "google/flan-t5-small"
-            tokenizer = AutoTokenizer.from_pretrained(model_id)
-            model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
-            pipe = pipeline(
-                "text2text-generation",
-                model=model,
-                tokenizer=tokenizer,
-                max_new_tokens=256,
-            )
-            _llm = HuggingFacePipeline(pipeline=pipe)
+            _llm = FlanT5LLM.from_pretrained("google/flan-t5-small")
         return _llm
     except Exception as e:
         _llm_error = str(e)
