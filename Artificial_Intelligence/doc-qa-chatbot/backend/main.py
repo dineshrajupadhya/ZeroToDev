@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from rag import (
     ingest_documents, ask_question, get_collection_stats,
     delete_documents_by_source, list_documents, SUPPORTED_EXTENSIONS,
-    get_vectorstore,
+    get_vectorstore, get_llm_status,
 )
 from config import UPLOAD_DIR
 
@@ -99,6 +99,11 @@ def health_check():
     return {"status": "ok"}
 
 
+@app.get("/health/llm")
+def health_llm():
+    return get_llm_status()
+
+
 @app.get("/supported-types")
 def supported_types():
     return {"types": SUPPORTED_EXTENSIONS}
@@ -171,18 +176,24 @@ def ask(req: AskRequest):
     stats = get_collection_stats(req.collection)
     if stats["total_chunks"] == 0:
         return AskResponse(
-            answer="No documents uploaded yet. Please upload a document first (PDF, TXT, DOCX, CSV, or MD) in the Documents tab, then ask your question.",
+            answer="No documents uploaded yet. Please upload a document first (PDF, TXT, DOCX, CSV, or MD), then ask your question.",
             sources=[],
         )
 
-    history_text = ""
-    if req.chat_history:
-        for msg in req.chat_history[-6:]:
-            role = "Human" if msg.get("role") == "user" else "Assistant"
-            history_text += f"{role}: {msg.get('content', '')}\n"
+    try:
+        history_text = ""
+        if req.chat_history:
+            for msg in req.chat_history[-6:]:
+                role = "Human" if msg.get("role") == "user" else "Assistant"
+                history_text += f"{role}: {msg.get('content', '')}\n"
 
-    result = ask_question(req.question, req.collection, history=history_text)
-    return AskResponse(answer=result["answer"], sources=result["sources"])
+        result = ask_question(req.question, req.collection, history=history_text)
+        return AskResponse(answer=result["answer"], sources=result["sources"])
+    except Exception as e:
+        return AskResponse(
+            answer=f"Sorry, I encountered an error processing your question: {str(e)}. Please try again.",
+            sources=[],
+        )
 
 
 @app.get("/stats/{collection}", response_model=StatsResponse)
@@ -229,18 +240,21 @@ def summarize(req: SummarizeRequest):
     if not req.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
 
-    from rag import get_llm
-    llm = get_llm()
+    try:
+        from rag import get_llm
+        llm = get_llm()
 
-    prompt = f"""Summarize the following text in a clear and concise way. Cover the key points:
+        prompt = f"""Summarize the following text in a clear and concise way. Cover the key points:
 
 {req.text}
 
 Summary:"""
 
-    result = llm.invoke(prompt)
-    answer = result if isinstance(result, str) else result.get("text", str(result))
-    return {"summary": answer}
+        result = llm.invoke(prompt)
+        answer = result if isinstance(result, str) else result.get("text", str(result))
+        return {"summary": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Summarize failed: {str(e)}")
 
 
 @app.post("/scrape")

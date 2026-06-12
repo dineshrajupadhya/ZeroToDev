@@ -1,4 +1,5 @@
 import os
+import traceback
 from langchain_community.document_loaders import PyPDFLoader, TextLoader, CSVLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
@@ -13,39 +14,56 @@ from config import (
 
 _llm = None
 _embedding_model = None
+_llm_error = None
 
 
 def get_embeddings():
     global _embedding_model
-    if _embedding_model is None:
+    if _embedding_model is not None:
+        return _embedding_model
+    try:
         if OPENAI_API_KEY:
             from langchain_openai import OpenAIEmbeddings
             _embedding_model = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
         else:
             _embedding_model = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-    return _embedding_model
+        return _embedding_model
+    except Exception as e:
+        raise RuntimeError(f"Failed to load embeddings: {e}")
 
 
 def get_llm():
-    global _llm
+    global _llm, _llm_error
     if _llm is not None:
         return _llm
+    if _llm_error is not None:
+        raise RuntimeError(f"LLM previously failed to load: {_llm_error}")
+    try:
+        if OPENAI_API_KEY:
+            from langchain_openai import ChatOpenAI
+            _llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0, openai_api_key=OPENAI_API_KEY)
+        else:
+            model_id = "google/flan-t5-small"
+            tokenizer = AutoTokenizer.from_pretrained(model_id)
+            model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
+            pipe = pipeline(
+                "text2text-generation",
+                model=model,
+                tokenizer=tokenizer,
+                max_new_tokens=256,
+            )
+            _llm = HuggingFacePipeline(pipeline=pipe)
+        return _llm
+    except Exception as e:
+        _llm_error = str(e)
+        raise RuntimeError(f"Failed to load LLM: {e}")
 
-    if OPENAI_API_KEY:
-        from langchain_openai import ChatOpenAI
-        _llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0, openai_api_key=OPENAI_API_KEY)
-    else:
-        model_id = "google/flan-t5-small"
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
-        pipe = pipeline(
-            "text2text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            max_new_tokens=256,
-        )
-        _llm = HuggingFacePipeline(pipeline=pipe)
-    return _llm
+
+def get_llm_status():
+    return {
+        "loaded": _llm is not None,
+        "error": _llm_error,
+    }
 
 
 SUPPORTED_EXTENSIONS = {
