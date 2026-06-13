@@ -27,6 +27,39 @@ except ImportError:
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
 TIMEOUT = 300
 
+
+def stream_answer(question, model="flan-t5"):
+    try:
+        res = requests.post(f"{API_URL}/ask/stream", json={
+            "question": question, "collection": "docs",
+            "chat_history": [], "model": model,
+        }, timeout=TIMEOUT, stream=True)
+        full_answer = ""
+        sources = []
+        placeholder = st.empty()
+        for line in res.iter_lines(decode_unicode=True):
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if event["type"] == "chunk":
+                full_answer += event["data"]
+                placeholder.markdown(full_answer + "▌")
+            elif event["type"] == "sources":
+                sources = event["data"]
+            elif event["type"] == "done":
+                full_answer = event["data"]
+                placeholder.markdown(full_answer)
+        return full_answer, sources
+    except requests.exceptions.Timeout:
+        st.error("Timed out. Try again.")
+        return "", []
+    except Exception as e:
+        st.error(f"Error: {e}")
+        return "", []
+
 st.set_page_config(page_title="DocQA Chatbot", page_icon=":books:", layout="wide")
 
 st.markdown("""
@@ -66,6 +99,12 @@ tab_chat, tab_docs, tab_chunks, tab_analytics, tab_scrape, tab_compare, tab_simi
 # ── SIDEBAR: Model Selection ──────────────────────────────────
 with st.sidebar:
     st.header("Settings")
+    api_key = st.text_input("OpenAI API Key (optional)", type="password", key="api_key_input")
+    if api_key:
+        try:
+            requests.post(f"{API_URL}/set-key", json={"key": api_key}, timeout=5)
+        except Exception:
+            pass
     try:
         models_resp = requests.get(f"{API_URL}/models", timeout=5).json()
         model_options = {m["name"]: m["id"] for m in models_resp["models"]}
@@ -119,6 +158,19 @@ with tab_chat:
                             else:
                                 st.warning(f"{f['filename']}: {f.get('reason', 'error')}")
                         st.info(f"Total chunks: {data['total_chunks']}")
+                        try:
+                            sug_res = requests.get(f"{API_URL}/suggest", timeout=30)
+                            if sug_res.status_code == 200:
+                                suggestions = sug_res.json().get("suggestions", [])
+                                if suggestions:
+                                    st.divider()
+                                    st.subheader("Suggested Questions")
+                                    for sq in suggestions:
+                                        if st.button(sq, key=f"sug_{sq}", use_container_width=True):
+                                            st.session_state["voice_query"] = sq
+                                            st.rerun()
+                        except Exception:
+                            pass
                     else:
                         st.error("Upload failed")
                 except Exception as e:
@@ -149,32 +201,18 @@ with tab_chat:
             if voice_q:
                 st.session_state.messages.append({"role": "user", "content": voice_q, "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
                 with st.chat_message("assistant"):
-                    with st.spinner("Thinking..."):
-                        try:
-                            res = requests.post(f"{API_URL}/ask", json={
-                                "question": voice_q, "collection": "docs",
-                                "chat_history": [], "model": st.session_state.selected_model,
-                            }, timeout=TIMEOUT)
-                            if res.status_code == 200:
-                                data = res.json()
-                                answer = data["answer"]
-                                st.write(answer)
-                                if data.get("sources"):
-                                    with st.expander("Sources"):
-                                        for src in data["sources"]:
-                                            st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
-                                            st.markdown(src.get("highlighted", src["content"]), unsafe_allow_html=True)
-                                st.session_state.messages.append({
-                                    "role": "assistant", "content": answer,
-                                    "sources": data.get("sources", []),
-                                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                })
-                            else:
-                                st.error(f"Error {res.status_code}")
-                        except requests.exceptions.Timeout:
-                            st.error("Timed out. Try again.")
-                        except Exception as e:
-                            st.error(f"Error: {e}")
+                    answer, sources = stream_answer(voice_q, st.session_state.selected_model)
+                    if answer:
+                        if sources:
+                            with st.expander("Sources"):
+                                for src in sources:
+                                    st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
+                                    st.markdown(src.get("highlighted", src["content"]), unsafe_allow_html=True)
+                        st.session_state.messages.append({
+                            "role": "assistant", "content": answer,
+                            "sources": sources,
+                            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        })
         else:
             st.info("Voice input requires SpeechRecognition package.")
 
@@ -201,37 +239,20 @@ with tab_chat:
                 st.caption(timestamp)
 
             with st.chat_message("assistant"):
-                with st.spinner("Thinking..."):
-                    try:
-                        history = [{"role": m["role"], "content": m["content"]}
-                                   for m in st.session_state.messages[:-1]
-                                   if m["role"] in ("user", "assistant")]
-                        res = requests.post(f"{API_URL}/ask", json={
-                            "question": question, "collection": "docs",
-                            "chat_history": history[-6:], "model": st.session_state.selected_model,
-                        }, timeout=TIMEOUT)
-                        if res.status_code == 200:
-                            data = res.json()
-                            answer = data["answer"]
-                            st.write(answer)
-                            if data.get("sources"):
-                                with st.expander("Sources"):
-                                    for src in data["sources"]:
-                                        st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
-                                        highlighted = src.get("highlighted", src["content"])
-                                        st.markdown(highlighted, unsafe_allow_html=True)
-                            st.session_state.messages.append({
-                                "role": "assistant", "content": answer,
-                                "sources": data.get("sources", []),
-                                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                "model": st.session_state.selected_model,
-                            })
-                        else:
-                            st.error(f"Error {res.status_code}")
-                    except requests.exceptions.Timeout:
-                        st.error("Timed out. Try again.")
-                    except Exception as e:
-                        st.error(f"Error: {e}")
+                answer, sources = stream_answer(question, st.session_state.selected_model)
+                if answer:
+                    if sources:
+                        with st.expander("Sources"):
+                            for src in sources:
+                                st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
+                                highlighted = src.get("highlighted", src["content"])
+                                st.markdown(highlighted, unsafe_allow_html=True)
+                    st.session_state.messages.append({
+                        "role": "assistant", "content": answer,
+                        "sources": sources,
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "model": st.session_state.selected_model,
+                    })
 
         st.divider()
         if st.button("Clear Chat", use_container_width=True):

@@ -52,6 +52,20 @@ class DeleteRequest(BaseModel):
     collection: str = "docs"
 
 
+class SetKeyRequest(BaseModel):
+    key: str
+
+
+@app.post("/set-key")
+def set_api_key(req: SetKeyRequest):
+    global OPENAI_API_KEY
+    if req.key.startswith("sk-"):
+        OPENAI_API_KEY = req.key
+        os.environ["OPENAI_API_KEY"] = req.key
+        return {"message": "OpenAI API key set", "status": "ok"}
+    return {"message": "Invalid key format", "status": "error"}
+
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
@@ -158,6 +172,33 @@ async def ask_stream(req: AskRequest):
         for chunk in ask_question_stream(req.question, req.collection, model_name=req.model):
             yield chunk
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+@app.get("/suggest")
+def suggest_questions(collection: str = "docs"):
+    stats = get_collection_stats(collection)
+    if stats["total_chunks"] == 0:
+        return {"suggestions": []}
+    try:
+        vectorstore = get_vectorstore(collection)
+        collection_obj = vectorstore._collection
+        all_docs = collection_obj.get(limit=5)
+        sample_text = "\n".join(all_docs["documents"][:3])[:1500]
+        llm = get_llm("flan-t5")
+        prompt = f"""Based on this text, generate 3 short questions a user might ask:
+
+{sample_text}
+
+Questions:
+1."""
+        result = llm.invoke(prompt)
+        answer = result if isinstance(result, str) else result.get("text", str(result))
+        questions = [q.strip().lstrip("0123456789. ") for q in answer.split("\n") if q.strip() and "?" in q]
+        if len(questions) < 3:
+            questions.extend(["What is this document about?", "Summarize the key points", "What are the main topics?"])
+        return {"suggestions": questions[:3]}
+    except Exception:
+        return {"suggestions": ["What is this document about?", "Summarize the key points", "What are the main topics?"]}
 
 
 @app.post("/compare")
