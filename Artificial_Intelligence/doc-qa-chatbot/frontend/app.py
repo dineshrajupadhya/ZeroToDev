@@ -199,27 +199,25 @@ with tab_chat:
         else:
             st.info("Voice input requires SpeechRecognition package.")
 
-        voice_q = st.session_state.pop("voice_query", None)
-        if voice_q:
-            st.session_state.messages.append({"role": "user", "content": voice_q, "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
-            with st.chat_message("user"):
-                st.write(voice_q)
-                st.caption(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            with st.chat_message("assistant"):
-                answer, sources = stream_answer(voice_q, st.session_state.selected_model)
-                if answer:
-                    if sources:
-                        with st.expander("Sources"):
-                            for src in sources:
-                                st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
-                                st.markdown(src.get("highlighted", src["content"]), unsafe_allow_html=True)
-                    st.session_state.messages.append({
-                        "role": "assistant", "content": answer,
-                        "sources": sources,
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    })
-        else:
-            st.info("Voice input requires SpeechRecognition package.")
+    voice_q = st.session_state.pop("voice_query", None)
+    if voice_q:
+        st.session_state.messages.append({"role": "user", "content": voice_q, "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+        with st.chat_message("user"):
+            st.write(voice_q)
+            st.caption(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        with st.chat_message("assistant"):
+            answer, sources = stream_answer(voice_q, st.session_state.selected_model)
+            if answer:
+                if sources:
+                    with st.expander("Sources"):
+                        for src in sources:
+                            st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
+                            st.markdown(src.get("highlighted", src["content"]), unsafe_allow_html=True)
+                st.session_state.messages.append({
+                    "role": "assistant", "content": answer,
+                    "sources": sources,
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                })
 
     with c2:
         st.subheader("Chat")
