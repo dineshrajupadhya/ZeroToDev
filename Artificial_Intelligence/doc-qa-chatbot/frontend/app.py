@@ -196,23 +196,28 @@ with tab_chat:
                         st.error(f"Speech service error: {e}")
                     except Exception as e:
                         st.error(f"Error: {e}")
+        else:
+            st.info("Voice input requires SpeechRecognition package.")
 
-            voice_q = st.session_state.pop("voice_query", None)
-            if voice_q:
-                st.session_state.messages.append({"role": "user", "content": voice_q, "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
-                with st.chat_message("assistant"):
-                    answer, sources = stream_answer(voice_q, st.session_state.selected_model)
-                    if answer:
-                        if sources:
-                            with st.expander("Sources"):
-                                for src in sources:
-                                    st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
-                                    st.markdown(src.get("highlighted", src["content"]), unsafe_allow_html=True)
-                        st.session_state.messages.append({
-                            "role": "assistant", "content": answer,
-                            "sources": sources,
-                            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        })
+        voice_q = st.session_state.pop("voice_query", None)
+        if voice_q:
+            st.session_state.messages.append({"role": "user", "content": voice_q, "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+            with st.chat_message("user"):
+                st.write(voice_q)
+                st.caption(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            with st.chat_message("assistant"):
+                answer, sources = stream_answer(voice_q, st.session_state.selected_model)
+                if answer:
+                    if sources:
+                        with st.expander("Sources"):
+                            for src in sources:
+                                st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
+                                st.markdown(src.get("highlighted", src["content"]), unsafe_allow_html=True)
+                    st.session_state.messages.append({
+                        "role": "assistant", "content": answer,
+                        "sources": sources,
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    })
         else:
             st.info("Voice input requires SpeechRecognition package.")
 
@@ -229,6 +234,20 @@ with tab_chat:
                             st.markdown(f"**[{src['metadata'].get('source', 'unknown')}]**")
                             highlighted = src.get("highlighted", src["content"])
                             st.markdown(highlighted, unsafe_allow_html=True)
+
+        if not st.session_state.messages:
+            try:
+                sug_res = requests.get(f"{API_URL}/suggest", timeout=10)
+                if sug_res.status_code == 200:
+                    suggestions = sug_res.json().get("suggestions", [])
+                    if suggestions:
+                        st.info("Try asking:")
+                        for sq in suggestions:
+                            if st.button(sq, key=f"chat_sug_{sq}", use_container_width=True):
+                                st.session_state["voice_query"] = sq
+                                st.rerun()
+            except Exception:
+                pass
 
         question = st.chat_input("Ask something...")
         if question:
