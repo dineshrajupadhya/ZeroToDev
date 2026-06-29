@@ -39,6 +39,11 @@ Whether you’re starting from scratch or sharpening your skills for your next r
 - Intermediate applications  
 - Full-stack & advanced projects  
 
+#### 🌐 Live Projects  
+| Project | Tech Stack | Live URL |  
+|---------|-----------|----------|  
+| **Contactless Restaurant Ordering** | React.js, Node.js, Express, SQLite, Tailwind CSS | [https://cafe-ordering-953.netlify.app](https://cafe-ordering-953.netlify.app) |  
+
 ### 🔹 Interview Prep  
 - Frequently asked coding questions  
 - HR & behavioral interview guidance  
