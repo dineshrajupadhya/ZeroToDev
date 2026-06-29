@@ -1,0 +1,30 @@
+// Online C compiler to run C program online
+#include <stdio.h>
+#include<stdlib.h>
+#include<time.h>//used to define the time parameter in the code
+int main() {
+    int number;
+    int guessed_number;
+    srand(time(0));/*used to seed the random number generator (rand()) with the current time in seconds.*/
+     number = rand() % 10 + 1;
+    printf("Enter the guessed number:");
+    scanf("%d",&guessed_number);
+    if(guessed_number==number)
+    printf("Guess is correct & number is:%d\n",number);
+    else
+    printf("Guess is wrong");
+    return 0;
+}
+
+
+//Sample Outputs
+Enter the guessed number:9
+Guess is correct & number is:9
+
+
+=== Code Execution Successful ===
+
+Enter the guessed number:6
+Guess is wrong
+
+=== Code Execution Successful ===

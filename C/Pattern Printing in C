@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include<stdlib.h>
+#include<time.h>//used to define the time parameter in the code
+int main() {
+  int number,i,j;
+  printf("Enter the number of rows:\n");
+  scanf("%d",&number);
+  for(i=1;i<=number;i++) //this is used to print the number of rows it will have(based on the user provided)
+  {
+      for(j=1;j<=i;j++) //this is used to print the number of times the pattern should show in the line
+      {
+          printf("*");
+      }
+      printf("\n");
+  }
+    return 0;
+}
+
+Output: 
+Enter the number of rows:
+4
+*
+**
+***
+****
+
+
+
+
+Explaintation:
+This is a simple C program that prints a right-angled triangle star pattern based on the number of rows entered by the user.
+
+How it works:
+
+The program asks the user to enter a number (example: 5).
+
+Using nested loops:
+
+The outer loop (i) controls the number of rows.
+
+The inner loop (j) controls how many stars (*) are printed in each row.
+
+On each new line, the number of stars increases by one, forming a triangle shape.

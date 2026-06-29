@@ -1,0 +1,30 @@
+// Online C compiler to run C program online
+
+#include <stdio.h>
+#include<stdlib.h>
+#include<time.h>//used to define the time parameter in the code
+int main() {
+  int number,i,j;
+  printf("Enter the number of rows:\n");
+  scanf("%d",&number);
+  for(i=1;i<=number;i++)/*this is used to print the number of rows it will have(based on the user provided)*/
+{
+      for(j=number;j>=i;j--)/*this is used to print the number of times the pattern should show in the line*/
+      {
+          printf("12");
+      }
+      printf("\n");
+  }
+    return 0;
+}
+
+
+Output:
+Enter the number of rows:
+4
+12121212
+121212
+1212
+
+Description: This C program prints an inverted triangle pattern using numbers (12) based on the number of rows entered by the user.
+12
