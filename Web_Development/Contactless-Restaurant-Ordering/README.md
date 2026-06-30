@@ -2,6 +2,8 @@
 
 A full-stack web application for contactless restaurant ordering. Customers can scan QR codes at tables, browse menus, place orders digitally, and track their order status in real-time.
 
+**Live URL:** [https://cafe-ordering-953.netlify.app](https://cafe-ordering-953.netlify.app)
+
 ## Tech Stack
 
 - **Frontend:** React.js, Tailwind CSS, React Router v6
