@@ -1,6 +1,6 @@
 # ZeroToDev
 <p align="center">
-  <img src="./ZeroToDevBanner.png" alt="ZeroToDev Banner"/>
+  <img src="https://raw.githubusercontent.com/dineshrajupadhya/ZeroToDev/main/ZeroToDevBanner.png" alt="ZeroToDev Banner"/>
   🚀 A complete roadmap from coding basics to becoming a professional developer – fundamentals, projects, and interview prep.
 </p>
 ## 📌 About  
