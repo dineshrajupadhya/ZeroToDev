@@ -62,9 +62,7 @@ I am solving problems regularly to improve my **problem-solving skills** and pre
 
 ## 🤝 Connect With Me
 
--  [![LinkedIn](https://img.shields.io/badge/LinkedIn-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/dinesh-raj-upadhya-920075206/) 
--  [![Gmail](https://img.shields.io/badge/Gmail-red?style=flat&logo=gmail&logoColor=white)](mailto:dineshrajupadhya86@gmail.com)
--  [![Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white)](https://discord.com/channels/@me)
+-  [![LinkedIn](https://img.shields.io/badge/LinkedIn-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/dinesh-raj-upadhya-920075206/)  [![Gmail](https://img.shields.io/badge/Gmail-red?style=flat&logo=gmail&logoColor=white)](mailto:dineshrajupadhya86@gmail.com)  [![Discord](https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white)](https://discord.com/channels/@me)
 
 
 ---
